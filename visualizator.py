@@ -67,7 +67,7 @@ class UserWindow():
                     end = True
                 elif c == ord('b'):
                     #click  B to go previous image
-                    self.index -= 2
+                    self.index -= 2            
             
             self.unloadImage()
             self.index += 1
@@ -81,7 +81,6 @@ class UserWindow():
             self.defect_index += 1
             self.update()
     
-
 def main():
     window = UserWindow('test')
     dataset = DefectDataset(BASE_PATH, 'both')
