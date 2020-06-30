@@ -1,101 +1,91 @@
 import numpy as np
 import cv2, os, pdb, csv 
+from utils import *
+from dataset_generator import  *
+from ROI import *
 
-BASE_PATH = 'Dataset/data_test/'
-CSV_FILENAME = 'labels_doc.csv'
+def getLabelsFilename(info):
+    filename = info['image_filename']
+    filename = filename.replace('.png', '.txt')
+    return filename
 
-class DefectDataset():
-    def __init__(self, path, mask_type):
-        if mask_type == 'disk' or mask_type == 'interdisk' or mask_type == 'both' :
-            self.mask_type = mask_type
-        else:
-            raise AssertionError("This mask type is not allowed")
+class UserWindow():
+    ROIarray = ROIArray()
+    actual_filename = ''
+    actual_image = None
+    actual_defects  = []
+    actual_info = None
+    index = 0
+    defect_index = 0 
+
+    def __init__(self, window_name):
+        self.window_name = window_name
+        cv2.namedWindow(window_name)
+        cv2.setMouseCallback(window_name,self.clickCallback)
+
+    def loadImage(self, image_tuple):
+        image, mask, info = image_tuple
+        self.actual_info = info
+        self.actual_defects = [0] + info['defect_numbers']
+        self.actual_filename = getLabelsFilename(info)
+        self.ROIarray.load(self.actual_filename,image_tuple)
+
+        img = getMaskedImage(image,mask,'both')
+        self.actual_image = img
+        self.update()
         
-        self.path = path
-        self.image_path = path + 'images/'
-        self.labels_path = path + 'labels/'
-
-        self.images = sorted(os.listdir(self.image_path))
-        self.masks  = sorted(os.listdir(self.labels_path))
-
-        if (len(self.images) != len(self.masks)):
-            raise AssertionError(" number of images must be equal to number of labels")
-        self.length = len(self.images)
-        self.defects = self.readDefects(CSV_FILENAME)
-
-    def __getitem__(self,i):
-        defect_row = self.defects[i]
-
-        # print(self.images[i], defect_row['filename'])
-        if defect_row['filename'] != self.images[i]:
-            raise AssertionError('Both filenames must be equal')
     
-        image = cv2.imread(self.image_path+self.images[i])
-        mask  = cv2.imread(self.labels_path+self.masks[i])
-        mask_ = np.zeros(mask.shape)
+    def unloadImage(self):
+        self.defect_index = 0
+        self.ROIarray.save(self.actual_filename)
+        self.ROIarray.clear()
+        
+    def update(self):
+        img = self.actual_image.copy()
+        img = drawDefectNames(img,self.actual_info,self.defect_index)
+        img = self.ROIarray.drawROIs(img)
+
+        cv2.imshow(self.window_name,img)
+
+    def run(self,dataset):
+        end = False
+        while not end:
+            # cycle indexes
+
+            if self.index >= len(dataset):
+                self.index = 0
+            elif self.index < 0:
+                self.index = len(dataset) + self.index
+            
+            self.loadImage(dataset[self.index])
+            print(self.actual_filename)
+            c = -1
+            while c == -1:
+                c = cv2.waitKey(30)
+                if c == 27:
+                    #click ESC to exit
+                    end = True
+                elif c == ord('b'):
+                    #click  B to go previous image
+                    self.index -= 2
+            
+            self.unloadImage()
+            self.index += 1
+
+    def clickCallback(self,event,x,y,flags,param):
+
+        if event == cv2.EVENT_LBUTTONDOWN:
+            if self.defect_index >= len(self.actual_defects):
+                self.defect_index = 0
+            self.ROIarray.toggleDefect(x,y,self.actual_defects[self.defect_index])
+            self.defect_index += 1
+            self.update()
     
-        for i in range(3):
-            if self.mask_type == 'disk':
-                mask_[:,:,i] = mask[:,:,1]/255.0
-            if self.mask_type == 'interdisk':
-                mask_[:,:,i] = mask[:,:,2]/255.0
-            if self.mask_type == 'both':
-                mask_[:,:,i] = mask[:,:,1]/255.0 + mask[:,:,2]/255.0
-                
-        result = image * mask_.astype(np.uint8)
-
-        names = self.parseDefect(defect_row['defects']) 
-        for i,name in enumerate(names):
-            result = cv2.putText(result,name, #text
-                                    (20,(i+1)*30), #position at which writing has to start
-                                    cv2.FONT_HERSHEY_SIMPLEX, #font family
-                                    1, #font size
-                                    (209, 80, 0, 255), #font color
-                                    2) #font stroke
-                                
-        return result
-
-    def readDefects(self, filename):
-        defects = []
-        with open(self.path + filename,mode='r') as csv_file:
-            csv_reader = csv.reader(csv_file, delimiter=',')
-            for i,row in enumerate(csv_reader):
-                defect = {'index' : i  , 'filename': row[0] , 'defects': [int(i) for i in row[1:]]}
-                defects.append(defect)
-        return defects
-
-    def parseDefect(self, array_defect):
-        defect_names = []
-        # print(array_defect)
-        if array_defect[0]:
-            defect_names.append('Rusted Insulator')
-        if array_defect[1]:
-            defect_names.append('Broken Insulator Glass')
-        if array_defect[2]:
-            defect_names.append('Polluted Insulator')
-        if array_defect[3]:
-            defect_names.append('Flashover Insulator')
-        if array_defect[4]:
-            defect_names.append('Rusted Tower Structure')
-        if array_defect[5]:
-            defect_names.append('Bent Tower Bars')
-
-        return defect_names
-
-
-    def __len__(self): 
-        return self.length
-
 
 def main():
+    window = UserWindow('test')
     dataset = DefectDataset(BASE_PATH, 'both')
-    defects = dataset.readDefects('labels_doc.csv')
-    
-    for i in dataset:
-        cv2.imshow('image',i)
-        c = cv2.waitKey()
-        if c == 27:
-            break
+    window.run(dataset)
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
