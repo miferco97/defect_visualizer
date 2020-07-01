@@ -2,6 +2,8 @@ import cv2, os
 import numpy as np
 from utils import *
 
+IGNORE_ZERO_DEFECT = True
+
 class ROI():
     def __init__(self,x,y,w,h, defect):
         self.x, self.y = x,y
@@ -11,10 +13,24 @@ class ROI():
     def __repr__(self):
         return 'ROI: ' + self.getString()
 
+    def getDefect(self):
+        return self.defect
+
     def getString(self):
         string = "%4.3f %4.3f %4.3f %4.3f %d\n" %(self.x,self.y,self.w,self.h,self.defect)
         return string
     
+    def __eq__(self, value):
+        result = self.x == value.x  and\
+                 self.y == value.y  and\
+                 self.w == value.w  and\
+                 self.h == value.h
+        
+        return  result
+
+    def getCenter(self):
+        return (self.x + self.w / 2 , self.y + self.h / 2)
+
     def toggleDefect(self, defect):
         if self.defect != defect:
             self.defect = defect
@@ -44,19 +60,22 @@ class ROIArray():
     def load(self, filename, image_tuple):
         self.ROIs.clear()
         if not os.path.isfile(filename):
-            self.generateROIs(image_tuple)
+            self.ROIs = self.generateROIs(image_tuple)
         else:
-            self.parseROIs(filename)
-
+            gen_rois = self.generateROIs(image_tuple)    
+            parsed_rois = self.parseROIs(filename)
+            self.ROIs = self.compareROIs(gen_rois,parsed_rois)
+        
     def save(self,filename):
-        if self.ROIs: 
-            with open(filename,'w') as file_:
-                for elem in self.ROIs:
-                    file_.write(elem.getString())
-
-    def generateROIs(self,image_tuple):
-
-        pass
+        lines = []
+        for roi in self.ROIs:
+            if IGNORE_ZERO_DEFECT and roi.getDefect() == 0:
+                pass
+            else:
+                lines.append(roi.getString())
+        with open(filename,'w') as file_:
+            if lines:
+                file_.writelines(lines)
 
     def toggleDefect(self, x,y, defect):
         for elem in self.ROIs:
@@ -64,6 +83,7 @@ class ROIArray():
                 elem.toggleDefect(defect)
 
     def parseROIs(self,filename):
+        rois = []
         with open(filename,'r') as file_:
             lines = file_.readlines()
             for line in lines:
@@ -71,9 +91,8 @@ class ROIArray():
                 if len(line) != 5:
                     raise AssertionError('line must contain 5 elements')
                 x,y,w,h,defect = line 
-                self.ROIs.append(ROI(float(x),float(y),float(w),float(h),int(defect)))
-        print(self.ROIs)
-        
+                rois.append(ROI(float(x),float(y),float(w),float(h),int(defect)))
+        return rois
     
     def clear(self):
         self.ROIs.clear()
@@ -85,11 +104,26 @@ class ROIArray():
         return image
     
     def generateROIs(self, image_tuple):
+        rois = []
         image, mask, info  = image_tuple
         for method in ['disk','interdisk']:
             mask_ = getMaskedImage(image, mask, method, True)
             contours, hierarchy = cv2.findContours(mask_[:,:,0].astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             for i in range(len(contours)):
                 x,y,w,h = cv2.boundingRect(contours[i])
-                self.ROIs.append(ROI(float(x),float(y),float(w),float(h),int(0)))
-        
+                rois.append(ROI(float(x),float(y),float(w),float(h),int(0)))
+        return rois
+
+    def compareROIs(self, Rois1, Rois2):
+        final_Rois = []
+        for roi1 in Rois1:
+            roi_unseen = True
+            for roi2 in Rois2:
+                if roi1 == roi2:
+                    final_Rois.append(ROI(roi1.x,roi1.y,roi1.w,roi1.h,max(roi1.defect,roi2.defect)))
+                    Rois2.remove(roi2)
+                    roi_unseen = False
+            if roi_unseen:
+                final_Rois.append(roi1)                    
+        return final_Rois
+
