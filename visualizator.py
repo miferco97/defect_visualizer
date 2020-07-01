@@ -50,33 +50,46 @@ class UserWindow():
     def run(self,dataset):
         end = False
         while not end:
-            # cycle indexes
-
+            
             if self.index >= len(dataset):
                 self.index = 0
             elif self.index < 0:
                 self.index = len(dataset) + self.index
-            
+    
+
+            # cycle indexes
             self.loadImage(dataset[self.index])
+
             print(self.actual_filename)
-            c = -1
-            while c == -1:
+            change_image = False
+            while not change_image:
                 c = cv2.waitKey(30)
                 if c == 27:
                     #click ESC to exit
                     end = True
+
                 elif c == ord('b'):
                     #click  B to go previous image
-                    self.index -= 2
+                    self.index -= 1
+                    change_image = True
+            
                 elif c == ord('n'):
                     self.defect_index += 1
                     if self.defect_index >= len(self.actual_defects):
                         self.defect_index = 0
-                    print(self.defect_index)
+                    self.update()
+                    # print(self.defect_index)
 
-                elif c != -1:
-                    self.unloadImage()
+                elif c == -1:
+                    pass                    
+                else:
                     self.index += 1
+                    change_image = True
+
+            
+            self.unloadImage()
+
+                    
 
             
 

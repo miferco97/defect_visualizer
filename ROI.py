@@ -84,6 +84,9 @@ class ROIArray():
                 clicked_rois.append(elem)
         if len(clicked_rois) == 1:
             clicked_rois[0].toggleDefect(defect)
+        if len(clicked_rois) > 1:
+            # TODO implement this method for ease labeling
+            pass
              
     def parseROIs(self,filename):
         rois = []
