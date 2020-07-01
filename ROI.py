@@ -10,6 +10,12 @@ class ROI():
         self.w, self.h, = w,h
         self.defect = defect
         self.object = element
+        self.active = True
+
+    def setActive(self, value):
+        if not (type(value) is bool):
+            raise AssertionError ('active value must be boolean')
+        self.active = value
 
     def __repr__(self):
         return 'ROI: ' + self.getString()
@@ -36,11 +42,12 @@ class ROI():
         return (self.x + self.w / 2 , self.y + self.h / 2)
 
     def toggleDefect(self, defect):
-        if self.defect != defect:
-            self.defect = defect
-        else:
-            self.defect = 0
-    
+        if self.active:
+            if self.defect != defect:
+                self.defect = defect
+            else:
+                self.defect = 0
+        
     def isInside(self,x,y):
         if not (self.x <= x <= self.x + self.w):
             return False
@@ -49,12 +56,12 @@ class ROI():
         return True
     
     def plotRectangle(self,image, thickness = 2):
-        color = getColorFromDefect(self.defect)
-        
-        start_point = (int(self.x),int(self.y))
-        end_point = (int(self.x + self.w), int(self.y + self.h))
+        if self.active:
+            color = getColorFromDefect(self.defect)            
+            start_point = (int(self.x),int(self.y))
+            end_point = (int(self.x + self.w), int(self.y + self.h))
 
-        image = cv2.rectangle(image, start_point, end_point, color, thickness) 
+            image = cv2.rectangle(image, start_point, end_point, color, thickness) 
 
         return image
 
@@ -84,13 +91,22 @@ class ROIArray():
     def toggleDefect(self, x,y, defect):
         clicked_rois = []
         for elem in self.ROIs:
-            if elem.isInside(x,y):
+            
+            if elem.active and elem.isInside(x,y):
                 clicked_rois.append(elem)
         if len(clicked_rois) == 1:
             clicked_rois[0].toggleDefect(defect)
+
         if len(clicked_rois) > 1:
-            # TODO implement this method for ease labeling
-            pass
+            min_center_distance = np.inf
+            for roi in clicked_rois:
+                center_x,center_y = roi.getCenter()
+                distance = (x-center_x)**2 + (y-center_y)**2
+                if distance < min_center_distance:
+                    min_center_distance = distance
+                    candidate = roi
+            if candidate:
+                candidate.toggleDefect(defect)
              
     def parseROIs(self,filename):
         rois = []
@@ -107,13 +123,28 @@ class ROIArray():
     def clear(self):
         self.ROIs.clear()
     
+
+    def activateROIs(self):
+        for roi in self.ROIs:
+            roi.setActive(True)
+    
+    def deactivateROIs(self):
+        for roi in self.ROIs:
+            roi.setActive(False)
+    
+    def activeObjectROIs(self, tag):
+        for roi in self.ROIs:
+            if tag == 'both' or roi.getObject() == tag:
+                roi.setActive(True)
+            else:
+                roi.setActive(False)
+            
+
     def drawROIs(self,image,actual_defects = [1,2,3,4,5,6]):
         mask = getAppropiateMask(actual_defects)
+        self.activeObjectROIs(mask)
         for roi in self.ROIs:
-            if mask == 'None' or mask == 'both':
-                image = roi.plotRectangle(image)
-            elif mask == roi.getObject():
-                image = roi.plotRectangle(image)  
+            image = roi.plotRectangle(image)
                 
         return image
     

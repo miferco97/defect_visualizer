@@ -1,11 +1,12 @@
 import cv2, os
 import numpy as np
 
+DISK_MASK_INDEX = 1
+INTERDISK_MASK_INDEX = 2
 
 def parseDefectFromBinaryArray(array_defect):
     defect_names = []
     defect_numbers = []
-    # print(array_defect)
     if array_defect[0]:
         defect_names.append('Rusted Insulator')
         defect_numbers.append(1)
@@ -42,11 +43,11 @@ def getMaskedImage(image, mask, mask_type, return_mask_only = False):
     mask_ = np.zeros(mask.shape)
     for i in range(3):
         if mask_type == 'disk':
-            mask_[:,:,i] = mask[:,:,1]/255.0
+            mask_[:,:,i] = mask[:,:,DISK_MASK_INDEX]/255.0
         if mask_type == 'interdisk':
-            mask_[:,:,i] = mask[:,:,2]/255.0
+            mask_[:,:,i] = mask[:,:,INTERDISK_MASK_INDEX]/255.0
         if mask_type == 'both':
-            mask_[:,:,i] = mask[:,:,1]/255.0 + mask[:,:,2]/255.0
+            mask_[:,:,i] = mask[:,:,DISK_MASK_INDEX]/255.0 + mask[:,:,INTERDISK_MASK_INDEX]/255.0
 
     if return_mask_only:
         return mask_
@@ -78,7 +79,7 @@ def getColorFromDefect(defect):
     elif defect == 2:
         color = (0  ,255,255)
     elif defect == 3:
-        color = (255,255,0)
+        color = (255,200,60)
     elif defect == 4:
         color = (125,125,255)
     elif defect == 5:
@@ -91,7 +92,7 @@ def getColorFromDefect(defect):
     return color 
 
 def getAppropiateMask(defect_list):
-    if not defect_list:
+    if not defect_list or (len(defect_list) == 1 and defect_list[0] == 0):
         return 'None' 
     if 5 in defect_list or 6 in defect_list:
         return 'None'

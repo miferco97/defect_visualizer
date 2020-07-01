@@ -20,22 +20,39 @@ class DefectDataset():
         self.images = [image for image in filter(lambda x :  x.endswith('.png') , self.images)]
         self.masks  = sorted(os.listdir(self.labels_path))
 
-        if (len(self.images) != len(self.masks)):
-            raise AssertionError(" number of images must be equal to number of labels")
         self.length = len(self.images)
         self.defects = self.readDefects(CSV_FILENAME)
 
     def __getitem__(self,index):
 
-        defect_row = self.defects[index]
-        # print(self.images[i], defect_row['filename'])
-        if defect_row['filename'] != self.images[index]:
-            raise AssertionError('Both filenames must be equal')
-    
-        image = cv2.imread(self.image_path  + self.images[index])
-        mask  = cv2.imread(self.labels_path + self.masks [index])
-        image_filename = self.image_path + self.images[index]
+        # find index  in CSV
+        label_index = None
+        for i,row in enumerate(self.defects):
+            if row['filename'] == self.images[index]:
+                label_index = i
+                break
+        if label_index is None:
+            raise AssertionError('Cant find this filename in ' + CSV_FILENAME)
+        
+        # find mask
+        mask_index = None
+        for i,mask_elem in enumerate(self.masks):
+            if mask_elem == self.images[index]:
+                mask_index = i
+                break
+        if mask_index is None:
+            raise AssertionError('Cant find a mask named in ' + self.images[index])
 
+        
+        defect_row = self.defects[label_index]
+        
+        image_filename = self.image_path + self.images[index]
+        
+        image = cv2.imread(image_filename)
+        mask  = cv2.imread(self.labels_path + self.masks[mask_index])
+        
+        
+        mask = cv2.resize(mask, (image.shape[1],image.shape[0]))
         names, numbers = parseDefectFromBinaryArray(defect_row['defects']) 
 
         info = { 'defect_names'  : names,

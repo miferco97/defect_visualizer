@@ -4,7 +4,7 @@ Before runing you can install all dependencies with
 $ pip install -r requirements.txt
 
 For running:
- $ python visualizator.py
+ $ python visualizer.py
 
 
 commands : 
@@ -14,5 +14,7 @@ commands :
  B -> go to the previous image 
 
  N -> change label to tag
+
+ M -> toggle Mask view
 
  other key -> next image
