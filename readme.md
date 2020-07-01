@@ -5,3 +5,14 @@ $ pip install -r requirements.txt
 
 For running:
  $ python visualizator.py
+
+
+commands : 
+
+ ESC -> exit
+
+ B -> go to the previous image 
+
+ N -> change label to tag
+
+ other key -> next image
