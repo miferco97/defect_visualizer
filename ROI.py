@@ -44,7 +44,7 @@ class ROI():
             return False
         return True
     
-    def plotRectangle(self,image, thickness = 1):
+    def plotRectangle(self,image, thickness = 2):
         color = getColorFromDefect(self.defect)
         
         start_point = (int(self.x),int(self.y))
@@ -78,10 +78,13 @@ class ROIArray():
                 file_.writelines(lines)
 
     def toggleDefect(self, x,y, defect):
+        clicked_rois = []
         for elem in self.ROIs:
             if elem.isInside(x,y):
-                elem.toggleDefect(defect)
-
+                clicked_rois.append(elem)
+        if len(clicked_rois) == 1:
+            clicked_rois[0].toggleDefect(defect)
+             
     def parseROIs(self,filename):
         rois = []
         with open(filename,'r') as file_:

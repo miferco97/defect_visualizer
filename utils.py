@@ -53,12 +53,8 @@ def getMaskedImage(image, mask, mask_type, return_mask_only = False):
 def drawDefectNames(image, info ,defect_index):    
     for i,name in enumerate(info['defect_names']):
         size = 1
-        if defect_index == 0:
-            pass
-        else:
-            j = defect_index - 1
-            if i == j: 
-                size = 2 
+        if i == defect_index:
+            size = 2
         r,g,b = getColorFromDefect(info['defect_numbers'][i])
         result = cv2.putText(image,name, #text
                                 (20,(i+1)*30), #position at which writing has to start

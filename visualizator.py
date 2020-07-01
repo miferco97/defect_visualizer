@@ -26,7 +26,7 @@ class UserWindow():
     def loadImage(self, image_tuple):
         image, mask, info = image_tuple
         self.actual_info = info
-        self.actual_defects = [0] + info['defect_numbers']
+        self.actual_defects = info['defect_numbers'] + [0]
         self.actual_filename = getLabelsFilename(info)
         self.ROIarray.load(self.actual_filename,image_tuple)
 
@@ -67,18 +67,23 @@ class UserWindow():
                     end = True
                 elif c == ord('b'):
                     #click  B to go previous image
-                    self.index -= 2            
+                    self.index -= 2
+                elif c == ord('n'):
+                    self.defect_index += 1
+                    if self.defect_index >= len(self.actual_defects):
+                        self.defect_index = 0
+                    print(self.defect_index)
+
+                elif c != -1:
+                    self.unloadImage()
+                    self.index += 1
+
             
-            self.unloadImage()
-            self.index += 1
 
     def clickCallback(self,event,x,y,flags,param):
 
         if event == cv2.EVENT_LBUTTONDOWN:
-            if self.defect_index >= len(self.actual_defects):
-                self.defect_index = 0
             self.ROIarray.toggleDefect(x,y,self.actual_defects[self.defect_index])
-            self.defect_index += 1
             self.update()
     
 def main():
