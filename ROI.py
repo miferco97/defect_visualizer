@@ -5,14 +5,18 @@ from utils import *
 IGNORE_ZERO_DEFECT = True
 
 class ROI():
-    def __init__(self,x,y,w,h, defect):
+    def __init__(self,x,y,w,h, defect, element = None):
         self.x, self.y = x,y
         self.w, self.h, = w,h
         self.defect = defect
+        self.object = element
 
     def __repr__(self):
         return 'ROI: ' + self.getString()
-
+    
+    def getObject(self):
+        return self.object
+    
     def getDefect(self):
         return self.defect
 
@@ -103,10 +107,14 @@ class ROIArray():
     def clear(self):
         self.ROIs.clear()
     
-    def drawROIs(self,image):
-        image
+    def drawROIs(self,image,actual_defects = [1,2,3,4,5,6]):
+        mask = getAppropiateMask(actual_defects)
         for roi in self.ROIs:
-            image = roi.plotRectangle(image)
+            if mask == 'None' or mask == 'both':
+                image = roi.plotRectangle(image)
+            elif mask == roi.getObject():
+                image = roi.plotRectangle(image)  
+                
         return image
     
     def generateROIs(self, image_tuple):
@@ -117,7 +125,7 @@ class ROIArray():
             contours, hierarchy = cv2.findContours(mask_[:,:,0].astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             for i in range(len(contours)):
                 x,y,w,h = cv2.boundingRect(contours[i])
-                rois.append(ROI(float(x),float(y),float(w),float(h),int(0)))
+                rois.append(ROI(float(x),float(y),float(w),float(h),int(0),method))
         return rois
 
     def compareROIs(self, Rois1, Rois2):
@@ -126,7 +134,11 @@ class ROIArray():
             roi_unseen = True
             for roi2 in Rois2:
                 if roi1 == roi2:
-                    final_Rois.append(ROI(roi1.x,roi1.y,roi1.w,roi1.h,max(roi1.defect,roi2.defect)))
+                    if roi1.getObject() != None:
+                        element = roi1.getObject()
+                    else:
+                        element = roi2.getObject()
+                    final_Rois.append(ROI(roi1.x,roi1.y,roi1.w,roi1.h,max(roi1.defect,roi2.defect),element))
                     Rois2.remove(roi2)
                     roi_unseen = False
             if roi_unseen:

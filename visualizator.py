@@ -29,8 +29,10 @@ class UserWindow():
         self.actual_defects = info['defect_numbers'] + [0]
         self.actual_filename = getLabelsFilename(info)
         self.ROIarray.load(self.actual_filename,image_tuple)
+        
 
-        img = getMaskedImage(image,mask,'both')
+        img = getMaskedImage(image,mask,getAppropiateMask(info['defect_numbers']))
+        
         self.actual_image = img
         self.update()
         
@@ -43,7 +45,7 @@ class UserWindow():
     def update(self):
         img = self.actual_image.copy()
         img = drawDefectNames(img,self.actual_info,self.defect_index)
-        img = self.ROIarray.drawROIs(img)
+        img = self.ROIarray.drawROIs(img,self.actual_defects)
 
         cv2.imshow(self.window_name,img)
 
@@ -55,7 +57,6 @@ class UserWindow():
                 self.index = 0
             elif self.index < 0:
                 self.index = len(dataset) + self.index
-    
 
             # cycle indexes
             self.loadImage(dataset[self.index])
@@ -86,18 +87,15 @@ class UserWindow():
                     self.index += 1
                     change_image = True
 
-            
             self.unloadImage()
-
-                    
-
-            
 
     def clickCallback(self,event,x,y,flags,param):
 
         if event == cv2.EVENT_LBUTTONDOWN:
             self.ROIarray.toggleDefect(x,y,self.actual_defects[self.defect_index])
             self.update()
+    
+
     
 def main():
     window = UserWindow('test')

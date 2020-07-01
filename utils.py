@@ -35,6 +35,10 @@ def parseDefectFromBinaryArray(array_defect):
 
 
 def getMaskedImage(image, mask, mask_type, return_mask_only = False):
+    
+    if mask_type == 'None':
+        return image
+
     mask_ = np.zeros(mask.shape)
     for i in range(3):
         if mask_type == 'disk':
@@ -85,3 +89,15 @@ def getColorFromDefect(defect):
         color = (125,125,125)
         
     return color 
+
+def getAppropiateMask(defect_list):
+    if not defect_list:
+        return 'None' 
+    if 5 in defect_list or 6 in defect_list:
+        return 'None'
+    if not 2 in defect_list and not 3 in defect_list:
+        return 'interdisk'
+    if not 1 in defect_list and not 4 in defect_list:
+        return 'disk'
+    
+    return 'both'
