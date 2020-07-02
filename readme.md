@@ -12,9 +12,11 @@ commands :
  ESC -> exit
 
  B -> go to the previous image 
-
+ 
  N -> change label to tag
 
  M -> toggle Mask view
+
+ O -> change Opacity
 
  other key -> next image
