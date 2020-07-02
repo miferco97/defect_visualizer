@@ -3,6 +3,7 @@ import numpy as np
 from utils import *
 
 IGNORE_ZERO_DEFECT = True
+MINIMUM_ROI_AREA = 25*25 # In pixels
 
 class ROI():
     def __init__(self,x,y,w,h, defect, element = None):
@@ -11,12 +12,24 @@ class ROI():
         self.defect = defect
         self.object = element
         self.active = True
-
+        self.checkArea()
+    
+    def checkArea(self):
+        last_active = self.active
+        if MINIMUM_ROI_AREA:
+            if last_active == True:     
+                area = self.w * self.h
+                if area < MINIMUM_ROI_AREA:
+                    self.active = False
+                else:
+                    self.active = True
+            
     def setActive(self, value):
+        
         if not (type(value) is bool):
             raise AssertionError ('active value must be boolean')
         self.active = value
-
+        self.checkArea()
     def __repr__(self):
         return 'ROI: ' + self.getString()
     

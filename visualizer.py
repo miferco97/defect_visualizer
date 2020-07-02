@@ -3,6 +3,10 @@ import cv2, os, pdb, csv
 from utils import *
 from dataset_generator import  *
 from ROI import *
+from cycleLists import *
+
+OPACITY_LEVELS = [1, 0.6, 0.3 , 0]
+MODES = ['normal','mask']
 
 def getLabelsFilename(info):
     filename = info['image_filename']
@@ -15,10 +19,11 @@ class UserWindow():
     actual_image = None
     actual_defects  = []
     actual_info = None
-    index = 0
-    mode = 'normal'
-    defect_index = 0
-    index_dif = +1
+    
+    index = None
+    defect_index = None
+    mode = CycleList(MODES)
+    opacity_level = CycleList(OPACITY_LEVELS)
 
     def __init__(self, window_name):
         self.window_name = window_name
@@ -30,48 +35,38 @@ class UserWindow():
         self.actual_mask = mask
         self.actual_info = info
         self.actual_defects = info['defect_numbers'] + [0]
+        self.defect_index = CycleIndexes(len(self.actual_defects))
         self.actual_filename = getLabelsFilename(info)
         self.ROIarray.load(self.actual_filename,image_tuple)        
         self.actual_image = image
         
     
     def unloadImage(self):
-        self.defect_index = 0
         self.ROIarray.save(self.actual_filename)
         self.ROIarray.clear()
         
     def update(self):
         img = self.actual_image.copy()
 
-        if self.mode == 'normal':
-            img = getMaskedImage(img,self.actual_mask,getAppropiateMask(self.actual_info['defect_numbers']))
-        if self.mode == 'mask':
+        if self.mode.get() == 'normal':
+            
+            img = getMaskedImage(img,self.actual_mask,getAppropiateMask(self.actual_info['defect_numbers']),opacity=self.opacity_level.get())
+        if self.mode.get() == 'mask':
             img = getMaskedImage(img,self.actual_mask,getAppropiateMask(self.actual_info['defect_numbers']),True)
-
-        img = drawDefectNames(img,self.actual_info,self.defect_index)
+        img = drawDefectNames(img,self.actual_info,self.defect_index.get())
         img = self.ROIarray.drawROIs(img,self.actual_defects)
         
         cv2.imshow(self.window_name,img)
 
-    def toggleMode(self):
-        if  self.mode == 'normal':
-            self.mode = 'mask'
-        else:
-            self.mode = 'normal'
-
     def run(self,dataset):
         end = False
+        self.index = CycleIndexes(len(dataset))
         while not end:
-
-            if self.index >= len(dataset):
-                self.index = 0
-            elif self.index < 0:
-                self.index = len(dataset) + self.index
-
-            # cycle indexes
-            self.loadImage(dataset[self.index])
-            
+    
+            self.loadImage(dataset[self.index.get()])
+        
             if getAppropiateMask(self.actual_defects) == 'None':
+                self.index.lastStep()
                 change_image = True
                 print (self.actual_filename + ' does not have any defects')
             else:
@@ -88,35 +83,37 @@ class UserWindow():
 
                 elif c == ord('b'):
                     #click  B to go previous image
-                    self.index_dif = -1
+                    self.index.previous()
                     change_image = True
             
                 elif c == ord('n'):
-                    self.defect_index += 1
-                    if self.defect_index >= len(self.actual_defects):
-                        self.defect_index = 0
+                    self.defect_index.next()
                     self.update()
                     # print(self.defect_index)
 
                 elif c == ord('m'):
-                    self.toggleMode()
+                    self.mode.next()
+                    self.update()
+
+                elif c == ord('o'):
+                    self.opacity_level.next()
                     self.update()
 
 
                 elif c == -1:
                     pass                    
                 else:
-                    self.index_dif = +1
+                    self.index.next()
                     change_image = True
 
             self.unloadImage()
-            self.index += self.index_dif
 
 
     def clickCallback(self,event,x,y,flags,param):
 
         if event == cv2.EVENT_LBUTTONDOWN:
-            self.ROIarray.toggleDefect(x,y,self.actual_defects[self.defect_index])
+            self.ROIarray.toggleDefect(x,y,self.actual_defects[self.defect_index.get()])
+
             self.update()
 
     

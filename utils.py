@@ -34,26 +34,50 @@ def parseDefectFromBinaryArray(array_defect):
     return defect_names, defect_numbers
     
 
+def maskProcessing(mask):
+    ret2,th2 = cv2.threshold(mask,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    out = th2
+    kernel = np.ones((5,5),np.uint8)
+    out = cv2.morphologyEx(out, cv2.MORPH_OPEN, kernel)
+    out = cv2.morphologyEx(out, cv2.MORPH_OPEN, kernel)
+    out = cv2.morphologyEx(out, cv2.MORPH_OPEN, kernel)
+    return out.astype(np.float32)
 
-def getMaskedImage(image, mask, mask_type, return_mask_only = False):
+
+def setMaskOpacity(mask, opacity):
+    if opacity == 0 :
+        mask = np.ones(mask.shape)
+    else:
+        opacity = 1 - opacity
+        
+    mask = mask/np.max(mask)
+    mask *= mask * (1 - opacity)
+    mask += opacity
+    
+    return mask
+
+def getMaskedImage(image, mask, mask_type, return_mask_only = False, opacity = 1):
     
     if mask_type == 'None':
         return image
 
+
     mask_ = np.zeros(mask.shape)
     for i in range(3):
-        if mask_type == 'disk':
-            mask_[:,:,i] = mask[:,:,DISK_MASK_INDEX]/255.0
-        if mask_type == 'interdisk':
-            mask_[:,:,i] = mask[:,:,INTERDISK_MASK_INDEX]/255.0
-        if mask_type == 'both':
-            mask_[:,:,i] = mask[:,:,DISK_MASK_INDEX]/255.0 + mask[:,:,INTERDISK_MASK_INDEX]/255.0
+        if mask_type == 'disk' or mask_type == 'both': 
+            # mask_[:,:,i] = mask[:,:,DISK_MASK_INDEX]/255.0
+            mask_[:,:,i] += maskProcessing(mask[:,:,DISK_MASK_INDEX])
+            
+        if mask_type == 'interdisk' or mask_type == 'both' :
+            mask_[:,:,i] += maskProcessing(mask[:,:,INTERDISK_MASK_INDEX])
 
+    cv2.imshow('mask',mask_)
     if return_mask_only:
         return mask_
 
-    result = image * mask_.astype(np.uint8)
-    return result
+    
+    result = image * setMaskOpacity(mask_,opacity)
+    return result.astype(np.uint8)
 
 def drawDefectNames(image, info ,defect_index):    
     for i,name in enumerate(info['defect_names']):
