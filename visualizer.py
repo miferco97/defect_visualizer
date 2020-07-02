@@ -8,6 +8,7 @@ from cycleLists import *
 OPACITY_LEVELS = [0.6, 0.3 , 0 ,1 ]
 MODES = ['normal','mask']
 
+
 def getLabelsFilename(info):
     filename = info['image_filename']
     filename = filename.replace('.png', '.txt')
@@ -19,6 +20,7 @@ class UserWindow():
     actual_image = None
     actual_defects  = []
     actual_info = None
+    showRectangles = True
     
     index = None
     defect_index = None
@@ -55,7 +57,8 @@ class UserWindow():
             raise AssertionError('This is not a supported Mode')
 
         img = drawDefectNames(img,self.actual_info,self.defect_index.get())
-        img = self.ROIarray.drawROIs(img,self.actual_defects)
+        if self.showRectangles:
+            img = self.ROIarray.drawROIs(img,self.actual_defects)
         
         cv2.imshow(self.window_name,img)
 
@@ -100,6 +103,9 @@ class UserWindow():
                     self.opacity_level.next()
                     self.update()
 
+                elif c == ord('r'):
+                    self.showRectangles= not self.showRectangles
+                    self.update()
 
                 elif c == -1:
                     pass                    
