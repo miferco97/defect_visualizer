@@ -59,6 +59,9 @@ class UserWindow():
         img = drawDefectNames(img,self.actual_info,self.defect_index.get())
         if self.showRectangles:
             img = self.ROIarray.drawROIs(img,self.actual_defects)
+        else:
+            self.ROIarray.deactivateROIs()
+
         
         cv2.imshow(self.window_name,img)
 
