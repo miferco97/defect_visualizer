@@ -58,20 +58,21 @@ def setMaskOpacity(mask, opacity):
 
 def getMaskedImage(image, mask, mask_type, return_mask = None, opacity = 1):
     
+    
     if mask_type == 'None':
         return image
     
     if return_mask == 'Original':
-        return mask 
-
+        return mask.copy() 
+    _mask = mask.copy()
     mask_ = np.zeros(mask.shape)
     for i in range(3):
         if mask_type == 'disk' or mask_type == 'both': 
             # mask_[:,:,i] = mask[:,:,DISK_MASK_INDEX]/255.0
-            mask_[:,:,i] += maskProcessing(mask[:,:,DISK_MASK_INDEX])
+            mask_[:,:,i] += maskProcessing(_mask[:,:,DISK_MASK_INDEX])
             
         if mask_type == 'interdisk' or mask_type == 'both' :
-            mask_[:,:,i] += maskProcessing(mask[:,:,INTERDISK_MASK_INDEX])
+            mask_[:,:,i] += maskProcessing(_mask[:,:,INTERDISK_MASK_INDEX])
 
     # cv2.imshow('mask',mask_)
     if return_mask == 'filtered':
@@ -81,7 +82,7 @@ def getMaskedImage(image, mask, mask_type, return_mask = None, opacity = 1):
     result = image * setMaskOpacity(mask_,opacity)
     return result.astype(np.uint8)
 
-def drawDefectNames(image, info ,defect_index):    
+def drawDefectNames(image, info ,defect_index):
     for i,name in enumerate(info['defect_names']):
         size = 1
         if i == defect_index:

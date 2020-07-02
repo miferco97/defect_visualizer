@@ -5,7 +5,7 @@ from dataset_generator import  *
 from ROI import *
 from cycleLists import *
 
-OPACITY_LEVELS = [1, 0.6, 0.3 , 0]
+OPACITY_LEVELS = [0.6, 0.3 , 0 ,1 ]
 MODES = ['normal','mask']
 
 def getLabelsFilename(info):
@@ -46,13 +46,14 @@ class UserWindow():
         self.ROIarray.clear()
         
     def update(self):
-        img = self.actual_image.copy()
-
+        # img = self.actual_image.copy()
         if self.mode.get() == 'normal':
-            
-            img = getMaskedImage(img,self.actual_mask,getAppropiateMask(self.actual_info['defect_numbers']),opacity=self.opacity_level.get())
-        if self.mode.get() == 'mask':
-            img = getMaskedImage(img,self.actual_mask,getAppropiateMask(self.actual_info['defect_numbers']),'Original')
+            img = getMaskedImage(self.actual_image.copy(),self.actual_mask,getAppropiateMask(self.actual_info['defect_numbers']),opacity=self.opacity_level.get())
+        elif self.mode.get() == 'mask':
+            img = getMaskedImage(self.actual_image.copy(),self.actual_mask,getAppropiateMask(self.actual_info['defect_numbers']),'Original')
+        else:
+            raise AssertionError('This is not a supported Mode')
+
         img = drawDefectNames(img,self.actual_info,self.defect_index.get())
         img = self.ROIarray.drawROIs(img,self.actual_defects)
         
@@ -113,13 +114,12 @@ class UserWindow():
 
         if event == cv2.EVENT_LBUTTONDOWN:
             self.ROIarray.toggleDefect(x,y,self.actual_defects[self.defect_index.get()])
-
             self.update()
 
     
 def main():
     window = UserWindow('test')
-    dataset = DefectDataset(BASE_PATH, 'both')
+    dataset = DefectDataset(BASE_PATH)
     window.run(dataset)
     cv2.destroyAllWindows()
 

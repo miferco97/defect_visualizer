@@ -6,14 +6,10 @@ from utils import *
 BASE_PATH = 'Dataset/data_ree/'
 CSV_FILENAME = 'labels_doc.csv'
 
-NORMALIZED_HEIGTH = 480
+NORMALIZED_HEIGTH = 560
 
 class DefectDataset():
-    def __init__(self, path, mask_type):
-        if mask_type == 'disk' or mask_type == 'interdisk' or mask_type == 'both' :
-            self.mask_type = mask_type
-        else:
-            raise AssertionError("This mask type is not allowed")
+    def __init__(self, path):
         
         self.path = path
         self.image_path = path + 'images/'

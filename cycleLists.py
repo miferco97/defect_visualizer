@@ -1,5 +1,4 @@
 
-
 class CycleIndexes():
     def __init__(self,max_index):
         self.max = max_index 
@@ -53,6 +52,7 @@ class CycleList():
 
     def __len__(self):
         return self.len
+        
     def get(self):
         if self.internal_index is None:
             self.internal_index = 0
