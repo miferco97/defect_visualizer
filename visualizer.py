@@ -52,7 +52,7 @@ class UserWindow():
             
             img = getMaskedImage(img,self.actual_mask,getAppropiateMask(self.actual_info['defect_numbers']),opacity=self.opacity_level.get())
         if self.mode.get() == 'mask':
-            img = getMaskedImage(img,self.actual_mask,getAppropiateMask(self.actual_info['defect_numbers']),True)
+            img = getMaskedImage(img,self.actual_mask,getAppropiateMask(self.actual_info['defect_numbers']),'Original')
         img = drawDefectNames(img,self.actual_info,self.defect_index.get())
         img = self.ROIarray.drawROIs(img,self.actual_defects)
         

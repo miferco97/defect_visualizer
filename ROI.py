@@ -25,11 +25,11 @@ class ROI():
                     self.active = True
             
     def setActive(self, value):
-        
         if not (type(value) is bool):
             raise AssertionError ('active value must be boolean')
         self.active = value
         self.checkArea()
+
     def __repr__(self):
         return 'ROI: ' + self.getString()
     
@@ -165,7 +165,7 @@ class ROIArray():
         rois = []
         image, mask, info  = image_tuple
         for method in ['disk','interdisk']:
-            mask_ = getMaskedImage(image, mask, method, True)
+            mask_ = getMaskedImage(image, mask, method, 'filtered')
             contours, hierarchy = cv2.findContours(mask_[:,:,0].astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             for i in range(len(contours)):
                 x,y,w,h = cv2.boundingRect(contours[i])

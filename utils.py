@@ -49,18 +49,20 @@ def setMaskOpacity(mask, opacity):
         mask = np.ones(mask.shape)
     else:
         opacity = 1 - opacity
-        
+
     mask = mask/np.max(mask)
     mask *= mask * (1 - opacity)
     mask += opacity
     
     return mask
 
-def getMaskedImage(image, mask, mask_type, return_mask_only = False, opacity = 1):
+def getMaskedImage(image, mask, mask_type, return_mask = None, opacity = 1):
     
     if mask_type == 'None':
         return image
-
+    
+    if return_mask == 'Original':
+        return mask 
 
     mask_ = np.zeros(mask.shape)
     for i in range(3):
@@ -71,10 +73,10 @@ def getMaskedImage(image, mask, mask_type, return_mask_only = False, opacity = 1
         if mask_type == 'interdisk' or mask_type == 'both' :
             mask_[:,:,i] += maskProcessing(mask[:,:,INTERDISK_MASK_INDEX])
 
-    cv2.imshow('mask',mask_)
-    if return_mask_only:
+    # cv2.imshow('mask',mask_)
+    if return_mask == 'filtered':
         return mask_
-
+    
     
     result = image * setMaskOpacity(mask_,opacity)
     return result.astype(np.uint8)
