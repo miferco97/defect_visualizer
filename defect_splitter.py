@@ -1,6 +1,9 @@
-from dataset_generator import *
+import os
+import shutil
+
 from tqdm import tqdm
-import shutil, os
+
+from dataset_generator import *
 
 DESTINY_PATH = 'Dataset/data_ree/bent_tower_images/'
 COMPLEMENTARY_PATH = 'Dataset/data_ree/complementary_images/'
@@ -22,4 +25,3 @@ for image, mask , info in tqdm(dataset):
         shutil.copy(info['image_filename'],DESTINY_PATH+filename)
     else:
         shutil.copy(info['image_filename'],COMPLEMENTARY_PATH+filename)
-
