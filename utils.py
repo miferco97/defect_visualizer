@@ -99,6 +99,7 @@ def drawDefectNames(image, info ,defect_index):
 
 
 def getColorFromDefect(defect):
+
     if defect == 0:
         color = (255,255,255)
     elif defect == 1:
@@ -111,21 +112,25 @@ def getColorFromDefect(defect):
         color = (125,125,255)
     elif defect == 5:
         color = (125,255,125)
-    elif defect == 5:
-        color = (255,125,125)
+    elif defect == -1:
+        # RGB BGR
+        color = (0,165,255)
+    elif defect == -2:
+        color = (71,99,255)
     else:
         color = (125,125,125)
         
     return color 
 
 def getAppropiateMask(defect_list):
-    if not defect_list or (len(defect_list) == 1 and defect_list[0] == 0):
-        return 'None' 
-    if 5 in defect_list or 6 in defect_list:
-        return 'None'
-    if not 2 in defect_list and not 3 in defect_list:
-        return 'interdisk'
-    if not 1 in defect_list and not 4 in defect_list:
-        return 'disk'
+
+    # if not defect_list or (len(defect_list) == 1 and defect_list[0] == 0):
+    #     return 'None' 
+    # if 5 in defect_list or 6 in defect_list:
+    #     return 'None'
+    # if not 2 in defect_list and not 3 in defect_list:
+    #     return 'interdisk'
+    # if not 1 in defect_list and not 4 in defect_list:
+    #     return 'disk'
     
     return 'both'

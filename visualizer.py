@@ -43,8 +43,9 @@ class UserWindow():
         self.actual_image = image
         
     
-    def unloadImage(self):
-        self.ROIarray.save(self.actual_filename)
+    def unloadImage(self, save = True):
+        if save:
+            self.ROIarray.save(self.actual_filename)
         self.ROIarray.clear()
         
     def update(self):
@@ -68,8 +69,9 @@ class UserWindow():
     def run(self,dataset):
         end = False
         self.index = CycleIndexes(len(dataset))
+        save = True
         while not end:
-    
+            save = True
             self.loadImage(dataset[self.index.get()])
         
             if getAppropiateMask(self.actual_defects) == 'None':
@@ -106,6 +108,18 @@ class UserWindow():
                     self.opacity_level.next()
                     self.update()
 
+
+
+                elif c == ord('u'):
+                    save = False
+                    name = self.actual_filename.replace('.png','.txt')
+                    try:
+                        os.remove(name)
+                    except:
+                        pass
+                    change_image = True
+
+
                 elif c == ord('r'):
                     self.showRectangles= not self.showRectangles
                     self.update()
@@ -116,7 +130,7 @@ class UserWindow():
                     self.index.next()
                     change_image = True
 
-            self.unloadImage()
+            self.unloadImage(save)
 
 
     def clickCallback(self,event,x,y,flags,param):
