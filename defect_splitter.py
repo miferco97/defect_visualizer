@@ -5,8 +5,8 @@ from tqdm import tqdm
 
 from dataset_generator import *
 
-DESTINY_PATH = 'Dataset/data_ree/bent_tower_images/'
-COMPLEMENTARY_PATH = 'Dataset/data_ree/complementary_images/'
+DESTINY_PATH = './Dataset/data_ree/bent_tower_images/'
+COMPLEMENTARY_PATH = './Dataset/data_ree/complementary_images/'
 dataset = DefectDataset(BASE_PATH)
 
 try: 

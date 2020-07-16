@@ -3,7 +3,7 @@ import cv2, os, pdb, csv
 from utils import *
 
 # BASE_PATH = 'Dataset/data_test/'
-BASE_PATH = 'Dataset/data_ree/'
+BASE_PATH = './Dataset/data_ree/'
 CSV_FILENAME = 'labels_doc.csv'
 
 NORMALIZED_HEIGTH = 560
