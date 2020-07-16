@@ -5,7 +5,7 @@ from dataset_generator import  *
 from ROI import *
 from cycleLists import *
 
-OPACITY_LEVELS = [0.6, 0.3 , 0 ,1 ]
+OPACITY_LEVELS = [0.6, 0.3 ,0 , 1]
 MODES = ['normal','mask']
 
 
@@ -123,6 +123,11 @@ class UserWindow():
                 elif c == ord('r'):
                     self.showRectangles= not self.showRectangles
                     self.update()
+
+                elif c == ord('0'):
+                    self.ROIarray.setAllRois(0)
+                    self.update()
+
 
                 elif c == -1:
                     pass                    

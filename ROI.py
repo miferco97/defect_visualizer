@@ -189,6 +189,10 @@ class ROIArray():
                 rois.append(ROI(float(x),float(y),float(w),float(h),None,method))
         return rois
 
+    def setAllRois(self, value):
+         for roi in self.ROIs:
+            roi.defect = value
+
     def compareROIs(self, Rois1, Rois2):
         final_Rois = []
         for roi1 in Rois1:
