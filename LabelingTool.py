@@ -56,7 +56,6 @@ class Labeler():
         self.index = CycleIndexes(len(dataset))
         change_image = False
         while not end:
-
             image, filename = dataset[self.index.get()]
             print('file: ', filename)
             self.loadLabel(filename)
@@ -74,7 +73,7 @@ class Labeler():
                     self.index.previous()
                     change_image = True
             
-                elif c == ord('1') or ord ('2'):
+                elif c == ord('1') or c == ord('2'):
                     self.actual_defects.next()
                     self.updateImage(image)
                 elif c == -1:
