@@ -8,6 +8,7 @@ CSV_FILENAME = 'labels_doc.csv'
 
 NORMALIZED_HEIGTH = 560
 
+
 class DefectDataset():
     def __init__(self, path):
         
@@ -74,3 +75,32 @@ class DefectDataset():
 
     def __len__(self): 
         return self.length
+
+
+class ImagesDataset():
+
+    def __init__(self, path):
+    
+        self.image_path = path
+
+        self.images = sorted(os.listdir(self.image_path))
+        self.images = [image for image in filter(lambda x :  x.endswith('.png') , self.images)]
+
+        self.length = len(self.images)
+        
+    def __getitem__(self,index):
+
+        image_filename = self.image_path + self.images[index]
+        
+        image = cv2.imread(image_filename)
+        
+        if NORMALIZED_HEIGTH:
+            image_scale = NORMALIZED_HEIGTH / image.shape[0]
+            final_size = (int(image.shape[1]*image_scale),int(image.shape[0]*image_scale))
+            image = cv2.resize(image, final_size)
+                    
+        return (image, image_filename)
+
+    def __len__(self): 
+        return self.length
+

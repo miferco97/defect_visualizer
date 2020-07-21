@@ -3,3 +3,4 @@ images/
 labels/
 __pycache__/
 cropped/
+data_broken_insulator/

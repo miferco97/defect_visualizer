@@ -9,7 +9,6 @@ def checkFolders():
     os.makedirs(DISK_PATH,exist_ok=True)
     os.makedirs(INTERDISK_PATH,exist_ok=True)
 
-
 def findDestinyPath(label):
     
     if label[-1] in [-1,3]:
@@ -77,7 +76,9 @@ def cropImages(path = BASE_PATH):
         for i,label in enumerate(labels):
             cropped = cutImage(image,label)
             folder = findDestinyPath(label)
-            name = filename.split('.')[0]+'_'+str(i).zfill(2)
+            if folder is None or cropped.shape[0]*cropped.shape[1] < 60*60:
+                continue
+            name = filename.split('.')[0] + '_' +str(i).zfill(2) 
             cv2.imwrite(folder+name+'.png',cropped)
             with open(folder+name+'.txt','w') as file:
                 if label[-1]  < 0:
@@ -89,5 +90,3 @@ def cropImages(path = BASE_PATH):
 if __name__ == "__main__":
     checkFolders()
     cropImages()
-    # a = DefectDataset(BASE_PATH)
-    # readTxt(TEST_PATH)
