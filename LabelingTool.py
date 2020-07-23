@@ -1,4 +1,5 @@
 import numpy as np
+import random
 import cv2, os, pdb, csv
 from dataset_generator import ImagesDataset,BASE_PATH
 from cycleLists import *
@@ -25,7 +26,11 @@ class Labeler():
             with open(self.label_filename,'r') as f:
                 line = f.read()
                 line = line.rstrip().lstrip().split(' ')
-                index = DEFECT_LIST.index(int(line[-1]))
+                # print(line)
+                if len(line) > 4:
+                    index = DEFECT_LIST.index(int(line[4]))
+                else:
+                    index = 0
                 self.actual_defects.setInternalIndex(index)
         else:
             index = DEFECT_LIST.index(0)
@@ -48,7 +53,8 @@ class Labeler():
           
     def saveImageData(self):
         with open(self.label_filename,'w') as f:
-                line = "%4.3f %4.3f %4.3f %4.3f %d\n" %(0,0,0,0,self.actual_defects.get())
+            if self.actual_defects.get():
+                line = "%4.3f %4.3f %4.3f %4.3f %d %4.3f \n" %(0,0,0,0,self.actual_defects.get(),random.random()/11+0.9)
                 f.write(line)
 
     def run(self,dataset):

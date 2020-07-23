@@ -79,7 +79,7 @@ class BBploter():
 
     def __init__(self, load_folder, destiny_folder):
         self.load_folder = load_folder
-        self.dataset = ImagesDataset(load_folder, normalize = True)
+        self.dataset = ImagesDataset(load_folder, normalize = False)
         self.destiny_folder = destiny_folder
 
     def loadLabel(self,filename):
