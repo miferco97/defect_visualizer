@@ -87,7 +87,7 @@ class ROI():
             color = getColorFromDefect(self.defect)            
             start_point = (int(self.x),int(self.y))
             end_point = (int(self.x + self.w), int(self.y + self.h))
-
+            
             image = cv2.rectangle(image, start_point, end_point, color, thickness) 
 
         return image

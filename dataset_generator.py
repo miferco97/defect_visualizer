@@ -79,10 +79,10 @@ class DefectDataset():
 
 class ImagesDataset():
 
-    def __init__(self, path):
+    def __init__(self, path , normalize = True):
     
         self.image_path = path
-
+        self.normalize = normalize
         self.images = sorted(os.listdir(self.image_path))
         self.images = [image for image in filter(lambda x :  x.endswith('.png') , self.images)]
 
@@ -94,7 +94,7 @@ class ImagesDataset():
         
         image = cv2.imread(image_filename)
         
-        if NORMALIZED_HEIGTH:
+        if NORMALIZED_HEIGTH and self.normalize:
             image_scale = NORMALIZED_HEIGTH / image.shape[0]
             final_size = (int(image.shape[1]*image_scale),int(image.shape[0]*image_scale))
             image = cv2.resize(image, final_size)

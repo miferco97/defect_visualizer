@@ -122,6 +122,25 @@ def getColorFromDefect(defect):
         
     return color 
 
+
+def getTextFromDefect(defect):
+    if defect == 1:
+        text = 'Rusted'
+    elif defect == 2:
+        text = 'Broken'
+    elif defect == 3:
+        text = 'Polluted'
+    elif defect == 4:
+        text = 'Flashover'
+    elif defect == 6:
+        text = 'Bent'
+    else :
+        text = ''    
+    return text 
+
+
+
+
 def getAppropiateMask(defect_list):
 
     # if not defect_list or (len(defect_list) == 1 and defect_list[0] == 0):
